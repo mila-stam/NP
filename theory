@@ -1,0 +1,250 @@
+ZA SEKOJA KLASA:
+-toString()
+-equals()
+-hashCode()
+
+1. toString()
+mozhe da se genrerira preku IJ, a ako go pishuvame nie,
+go formatirame izgledot na promenlivite vo klasata spored baranjata
+
+2. equals()
+mozhe da se generira preku IJ
+ako go pishuvame nie mora da ima:
+- if(this == obj) return true;
+- if(obj == null) return false;
+- if(getClass() != obj.getClass()) return false
+- kastiranje na obj vo soodvetnata klasa
+- sporeduvanje na site potrebni promenlivi so kastiraniot obj
+
+
+ZA CHITANJE
+1. Scanner (se koristi za chitanje od InputStream, ama najchesto se koristi za formatirano chitanje, pr. niza/lista so n chlenovi
+
+Scanner sc = new Scanner (System.in)
+
+//deklaracija na list/niza koja kje se chita
+List<String> inputs = new ArrayList<>()   !!!sekogash na levo e poopshtot, a na desno pospecifichnoto
+       |
+od shto e sostavena
+(String, Integer,
+nekoja definirana klasa)
+
+while(sc.hasNextLine()){           //se chita se dodeka ima linii, VO INTELIJ ctrl+D ZA DA SE PRESTANE SO CHITANJE
+    String line = sc.nextLine();
+    inputs.add(line);              //prochitanata linija se dodava vo ArrayList
+}
+
+2. BufferedReader (se koristi za chitanje red po red, InputStreams)
+
+BufferedReader br = new BufferedReader (new InputStreamReader (System.in));
+                                                                    |
+                                                          bilo kakov input stream
+inputs = br.lines().collect(Collectors.toList());
+
+
+ANONIMNI KLASI
+definiranje na eden interfejs so sopstveni metodi
+i namesto da se pishuvaat povekje razlichi klasi koi
+kje gi implementiraat metodite na svoj nachin, a se ostanato
+kje bide isto, se instanciraat objekti od originalniot interfejs
+so razlichni iminja i tuka vednash se definira odnesuvanjeto na
+metodite od originalniot interfejs
+
+interface Operation{
+    int execute (int a, int b)
+}
+
+public static void main(String[] args){
+    Operation addition = new Operation {
+        @Override
+        public int execute (int a, int b){
+            return a+b;
+        }
+    };
+
+    Operation subtraction = new Operation {
+        @Override
+        public int execute (int a, int b){
+             return a-b;
+        }
+    };
+
+    Operation subtraction = new Operation {
+        @Override
+        public int execute (int a, int b){
+            return a*b;
+        }
+    };
+}
+
+LAMBDA EXPRESSIONS
+1. Anonimnite klasi mozhat da e prikazhat so LAMBDA expressions samo
+koga vo niv imaat EDNA metoda, ovie interfejsi se vikaat functional interfaces
+
+Operation divison = (a, b)    ->    a/b
+                       |             |
+                   vleznite      izlezot od
+                   argumenti    od funkcijata
+                  vo metodata
+
+2. Method reference
+zamena na lambda expressions so method reference mozhno e samo
+koja vo vlezot imame eden argumet i toj istiot se koristi i vo izlezot
+
+so lambda
+line -> new Person(line)
+line -> pw.println(line) - za printanje
+so method
+Person::new
+pw::println
+
+FUNCTIONAL INTERFACES
+1. Function
+-vo sebe ja sodrzhi samo metodata apply(), koja prima String a vrakja Integer
+-najchesto se koristi vo MAP function za da se pretvori eden tip vo drug
+//map() ochekuva funkcija
+
+List<String> strings = new ArrayList<>()
+
+strings.add("test");
+strings.add("lalal");
+strings.add("mkdmkd");
+strings.add("napredno Programiranje");
+
+    Function<String, Integer> appear = new Function<String, Integer>() {
+        @Override
+        public Integer apply(String s) {
+            return s.indexOf("a");
+        }
+    };
+    //zameneto so lamda
+    Function<String, Integer> appear = s -> s.toLower().indexOf("a");
+
+    strings.stream().map(appear).collect(Collectors.toList());
+    //se zemaat site stringovi od listata strings, se pretvaraat vo stream i se mapiraat spored funkcijata appear, i se sobiraat vo lista
+
+
+2. Predicate (condition)
+-vo sebe ja sodrzhi samo metodata test(), koja prima odredena promenliva i vrakja
+boolean, dali nekoj uslov e ispolnet ili ne
+-najchesto se koristi so FILTER stream operator
+-predikatite mozhe da se pishuvaat i direktno vo filterot, ne mora da se pravi poseben nov predikat kako metoda
+        List<Integer> integers = new ArrayList<>();
+
+        integers.add(1);
+        integers.add(-2);
+        integers.add(10);
+        integers.add(-5);
+
+        Predicate<Integer> positiveNumber = new Predicate<Integer>() {
+            @Override
+            public boolean test(Integer integer) {
+                return integer>0;
+            }
+        };
+
+        //so lambda
+        Predicate<Integer> positiveNumber = integer -> integer>0;
+        integers.stream().filter(positiveNumber).collect(Collectors.toList()); //so metoda
+
+        integers.stream().filter(integer -> integer>0).collect(Collectors.toList()); //direktno vo filter
+
+
+3. Supplier
+- vo sebe ja sodrzhi samo metodata get(), koja ne prima vrednosti, samo vrakja promenliva od soodvetniot tip
+
+        List<Integer> integers = new ArrayList<>();
+
+        integers.add(1);
+        integers.add(-2);
+        integers.add(10);
+        integers.add(-5);
+
+        Supplier<Integer> supplier = new Supplier<Integer>() {
+            @Override
+            public Integer get() {
+                return new Random().nextInt(10);
+            }
+        };
+        //so lambda
+        Supplier<Integer> supplier = () -> new Random().nextInt(10);
+        for (int i=0; i<100; i++){
+            System.out.println(supplier.get());  //mora da se povika metodata get()
+        }
+
+
+4. Consumer
+- vo sebe ja ima samo metodata accept(), koja prima argument od deklariraniot tip no ne vrakja rezultat
+- se koristi kaj FOREACH() metodot za streamovi
+
+        List<Integer> integers = new ArrayList<>();
+
+        integers.add(1);
+        integers.add(-2);
+        integers.add(10);
+        integers.add(-5);
+
+        Consumer<Integer> consumer = new Consumer<Integer>() {
+            @Override
+            public void accept(Integer integer) {
+                System.out.println(integer);
+            }
+        };
+        //so lambda
+        Consumer<Integer> consumer = integer -> System.out.println(integer);
+        for (int i=0; i<100; i++){
+            consumer.accept(i);
+        }
+
+ZA PECHATENJE
+1. PrintWriter
+
+    PrintWriter pw = new PrintWriter(os)
+                                      |
+                            bilo kakov output stream
+
+    Ako se pishuva vo file:
+    PrintWriter pw = new PrintWriter(new FileWriter(path)); //path e string koj go sodrzhi path na datotekata
+    pw.println(...)
+za zachuvuvanje na obijekti vo datoteka podobro e so:
+    ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(path));
+    oos.writeObject(phonebook);
+
+na kraj mora
+pw.flush();
+pw.close();
+
+IMMUTABLE CLASS
+-site instanci se deklariraat kako "final"
+-vo niv nema set metodi
+-inicijalizacija samo vo konstruktorot, i ovie vrednosti ne se menuvaat
+-vo metodite nema menuvanje na vnatreshnosta na objektot tuku se vrakja NOV objekt so potrebnite promeni
+
+GENERIC CLASSES and methods
+1. Koga se kreira generichki metod mora vo deklaracijata posle static da stoi
+<T extends Comparable<T>>, generic type parameter declaration, ensures that T must extend the Comparable interface
+
+2. Dokolku generichkata klasa ili interface treba da izvrshuvaat nekakvo sporeduvanje
+T mora da ja nasleduva klasata Comparable(<T extends Comparable<T>>),
+a ako generichkata klasa mozhe da se ogranichi samo na odreden tip, primer
+numerichki vrednosti, <T extends Number>
+
+3.<? extends (dome class)>
+wild card shto oznachuva deka ne e vazhno od koj tip e promenlivata se dodeka nasleduva
+od oznachenata klasa
+
+VAZHNO!!!
+1. da se razgleda formatot za inputot i spored toa se definira posebna klasa
+        pr: ako inputot se informacii za student, ime i prezime, index, ocenki ----> se kreira klasa Student
+2. glavno za zadachite
+    se chita neshto od InputStream, i se pechati vo OutputStream
+3. za da se smeni redosledot na elementite koga se sortiraat
+       -  .sorted(Comparator.reverseOrder())
+       -  da se smeni redoledot po koj se sporeduvaat vo compareTo() metodot
+4. za proveruvanje so regex za sodrzhina na odreden string
+    public boolean checkName(String name){
+            return Pattern.compile("^[a-zA-Z0-9]+$").matcher(name).matches();
+        }
+    proveruva dali vo imeto ima samo latinichni bukvi (mali i golemi) i brojkji
+5. TRI TOCHKI ... oznachuva varijabilen broj na argumenti
+pr: (String...s) kako argument na metod
