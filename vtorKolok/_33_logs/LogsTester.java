@@ -2,6 +2,7 @@ package np.vtor_kolok._33_logs;
 
 import javax.management.remote.rmi.RMIConnectorServer;
 import java.util.*;
+import java.util.stream.Collectors;
 
 class Log {
     String type;
@@ -60,18 +61,18 @@ class Log {
 class Microservice {
     String name;
     List<Log> logs;
-    //Map<Integer, List<Log>> logsBySeverity;
+    Map<Integer, List<Log>> logsBySeverity;
 
     public Microservice(String name) {
         this.name = name;
         logs = new ArrayList<>();
-        //logsBySeverity = new TreeMap<>();
+        logsBySeverity = new TreeMap<>();
     }
 
     public void addLog(Log l) {
         logs.add(l);
-        //logsBySeverity.putIfAbsent(l.getSeverity(), new ArrayList<>());
-        //logsBySeverity.get(l.getSeverity()).add(l);
+        logsBySeverity.putIfAbsent(l.getSeverity(), new ArrayList<>());
+        logsBySeverity.get(l.getSeverity()).add(l);
     }
 
     public int getSumSeverity() {
@@ -91,6 +92,10 @@ class Microservice {
     public List<Log> getLogs() {
         return logs;
     }
+
+    public Map<Integer, List<Log>> getLogsBySeverity() {
+        return logsBySeverity;
+    }
 }
 class ComparatorBuilder{
     public static Comparator<Log> makeComp(String order){
@@ -107,12 +112,32 @@ class ComparatorBuilder{
         }
     }
 }
+class Service{
+    String name;
+    Map<Integer, List<Log>> allLogsBySeverity;
+    Service(String name){
+        this.name=name;
+        allLogsBySeverity = new TreeMap<>();
+    }
+    public void addLog(Log l){
+        allLogsBySeverity.putIfAbsent(l.getSeverity(), new ArrayList<>());
+        allLogsBySeverity.get(l.getSeverity()).add(l);
+    }
+    public String getName(){
+        return name;
+    }
 
+    public Map<Integer, List<Log>> getAllLogsBySeverity() {
+        return allLogsBySeverity;
+    }
+}
 class LogCollector {
     Map<String, List<Microservice>> services;
+    Map<String, Service> servicesWithLogs;
 
     LogCollector() {
         services = new TreeMap<>();
+        servicesWithLogs = new TreeMap<>();
     }
 
     public void addLog(String log) {
@@ -142,6 +167,9 @@ class LogCollector {
             services.get(serviceName).add(micro);
 
         }
+        Service newServ = new Service(serviceName);
+        servicesWithLogs.put(serviceName, newServ);
+        servicesWithLogs.get(serviceName).addLog(l);
     }
 
     private int totalLogs(List<Microservice> list) {
@@ -168,9 +196,27 @@ class LogCollector {
                 });
     }
 
-    /*public Map<Integer, Integer> getSeverityDistribution (String service, String microservice){
-
-    }*/
+    public Map<Integer, Integer> getSeverityDistribution (String service, String microservice){
+        if(microservice == null){
+            /*return servicesWithLogs.get(service).getAllLogsBySeverity().entrySet().stream()
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            entry -> entry.getValue().size()
+                    ));*/
+            return Collections.emptyMap();
+        } else{
+            for (Microservice m:services.get(service)){
+                if (m.getName().equals(microservice)){
+                    return m.getLogsBySeverity().entrySet().stream()
+                            .collect(Collectors.toMap(
+                                    Map.Entry::getKey,
+                                    entry -> entry.getValue().size()
+                            ));
+                }
+            }
+        }
+        return Collections.emptyMap();
+    }
     public void displayLogs(String service, String microservice, String order){
         Comparator<Log> comparator = ComparatorBuilder.makeComp(order);
         Microservice micro = services.get(service).stream()
@@ -192,14 +238,6 @@ class LogCollector {
                         System.out.println(x);
                     });
         }
-
-        /*Optional<Microservice> micro = services.get(service).stream()
-                .filter(m -> m.getName().equals(microservice))
-                .findFirst();
-        micro.map(Microservice::getLogs).stream()
-                .sorted(comparator)
-                .forEach(System.out::println);*/
-
     }
 }
 
@@ -220,7 +258,7 @@ public class LogsTester {
                 if (parts.length == 3) {
                     microservice = parts[2];
                 }
-                //collector.getSeverityDistribution(service, microservice).forEach((k, v) -> System.out.printf("%d -> %d%n", k, v));
+                collector.getSeverityDistribution(service, microservice).forEach((k, v) -> System.out.printf("%d -> %d%n", k, v));
             } else if (line.startsWith("displayLogs")) {
                 String[] parts = line.split("\\s+");
                 String service = parts[1];
