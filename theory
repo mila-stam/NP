@@ -248,3 +248,133 @@ VAZHNO!!!
     proveruva dali vo imeto ima samo latinichni bukvi (mali i golemi) i brojkji
 5. TRI TOCHKI ... oznachuva varijabilen broj na argumenti
 pr: (String...s) kako argument na metod
+
+FLATMAP
+-mapiranje na stream od eden object vo povekje
+pr.  ako imame niza [1, 2, 3, 4]
+samo so map sekoj element mozhe da se pretvori vo eden drug, map(i -> i*10),
+po mapiranjeto kje dobieme niza [10, 20, 30, 40]
+
+so flatMap sekoj od ovie elementi mozheme da go pretvorime vo stream od povekje
+elementi, flatMap(i -> i.stream(i*10, i*2)
+
+KOMPARATORI
+1. Koga imame eden nachin na sporeduvanje na odreden tip na objekt, sporeduvanjeto
+    mozheme da go napravime so implementiranje na interfejsot Comparable<T> (T = soodveten tip na objekt)
+    i prepokrivanje na compareTo() metodot
+
+2. Koga imame potreba od sporeduvanje na odreden tip na objekt na povekje nachini mozheme:
+    !!!-Da napisheme klasi koi kje bidat komparatori i go implementiraat interfejsot Comparator<T> (T = soodveten tip na objekt)
+    i vo niv se prepoktiva metodot compareTo(). Tamu kade shto se koristat ovie klase se pishuva "new NameOfClass"
+    !!!-Da napisheme komparatori vo samata klasa (final Comparator<T> name = new Comparator<T>) i tuka se defnira anonimna klasa i vednash se
+    prepokriva compare metodot
+    Istoto mozhe da se napravi i so lambda izraz mesto so anonimna klasa
+    se pishuva samo imeto na komparatorot koga toj se koristi
+    !!!-Da napisheme komparatori vo samata klasa (final Comparator<T> name), isto kako prethodno
+    samo sega posle ednakvoto pishuvame Comparator.comparing(Student::getName).thenComparing(Student::getAvg)
+                                                                    |                 |
+                                                               uslovot spored       nadovrzuvame onolku komparatori kolku
+                                                               koj sporeduvame      shto ni trebaat
+    mozhe da se dodavaat endless thanComparing komparatori
+    Dokolku ima potreba da se sporeduvaat po obraten radosled na kraj stavame samo .reversed()
+
+SET
+1. TreeSet
+    Set<Integer> treeIntSet = new TreeSet<>();
+    - elementitie mora da bidat comparable, dokolku tipot na objekt e
+     korisnichki definiran mora da go implementira Comparable interfejsot
+     i da e prepokrien compareTo() metodot i pri sozdavanje na new TreeSet
+     kako eden argument se prakja metodot za sporeduvanje
+     - pristap O(logn), iteriranje O(nlogn), dodavanje O(logn), brishenje O(nlogn)
+     - se koristi koga vo zadacha se bara da nema duplikati i da bidat sortirani elementite
+     - sekogash se sostoi od unikatni elementi (nema nivno povtoruvanje)
+2. HashSet
+    Set<Integer> hashIntSet = new HashSet<>();
+    - vo konstruktorot ne se predava nishto
+    - najednostavna vremenska kompleksnost (koga se bara vnesuvanje na elementi so O(n) togash HashSet e potrebno)
+    - nema duplikati
+    - pristap, dodavanje, brishenje, O(1)
+    - redosledot pri vnesuvanje ne se zadrzhuva i elementite ne se sortirani
+3. LinkedHashSet
+    Set<String> linkedStringSet = new LinkedHashSet<>();
+    - se koristi za da se zachuva redosledot na vnesuvanje
+    - ne se sortirani elementite
+    - komplesnosta e ista kako i obichen HashSet
+    - pristap, dodavanje, brishenje, O(1)
+
+MAP (K=key, V=value)
+se koristat za BROENJE NA ELEMENTI,
+za GRUPIRANJE (kluchot e ona spored koe gi grupirame, a vrednost e mnozhestvo/kolekcija od grupiranite vrednosti
+1. TreeMap <K, V>
+    Map<Integer, String> treeMap = new TreeMap<>();
+    - kluchot mora da bide comparable, dokolku ne e kako argument vo konstruktorot se prakja komparator
+    - izbegnuva duplikat kluchevi
+    - mapata e sortirana spored kluchot vo rastechki redosled
+    - dodavanje O(logn), contains O(logn), iteriranje O(nlogn)
+    - dokolku se dodade nov element vo par so kluch koj vekje postoi, stariot element se zamenuva so noviot
+2. HashMap <K, V>
+    Map<String, String> hashMap = new HashMap<>();
+    - kluchevite mora da imaat prepokrien hashCode metod
+    - mapata e sortirana spored hashCode vredosta na kluchot vo rastechki redosled
+    - pristap, dodavanje, brishenje, O(1), iteriranje O(n)
+3. LinkedHashMap <K, V>
+    Map<String, String> linkedHashMap = new LinkedHashMap<>();
+    - kluchevite mora da imaat prepokrien hashCode metod
+    - redosledot na elementite ostanuva onaka kako shto nie sme gi vnesuvale
+    - ista komplesnost so hashMap
+
+COLLECTORS
+1. GrupingBy
+pr.
+return students.stream()
+                .filter(Student::hasSig)
+                .collect(Collectors.groupingBy(
+                        Student::getYear, //kako prv argument se dava kluchot
+                        Collectors.averagingDouble(Student::getSumPoints) //se davaat vrednostite
+                ));
+2. toMap
+return studentsByYear.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> getAvgSum(entry.getValue())
+                ));*/
+OBSERVER PATTERN
+1. Postoi edna/povekje klasi koi sproveduvaat odredeni informacii, ovie klasi se SUBJECT i vo sebe treba da imaat:
+    - site podatoci koi gi "nudat"
+    - collection (set, list) od observers
+    - register(Observer o) //registrira nov observer
+    - remove(Observer o) //go brishe dadeniot observer
+    - notifyAll() //gi izvestuva observers za nastanata promena preku observer.update()
+    - addMeasurement() //zema novi vrednosti za podatocite koi se "nudat" i se povikuva notifyAll()
+    ovie nasleduvaat od Subject interface
+2. Postojat povekje klasi koi gi zimaat podatocite od subjectot i najchesto gi prikazhuvaat, se vikaat OBSERVERS i imaat:
+    - promenlivi za podatocite koi gi primaat od Subjectot
+    - update() // se updatiraat vrednostite i se povikuva display()
+    - display() //se pechatat promenetite podatoci
+    ovie nasleduvaat od Observer interface
+
+DECORATOR PATTERN
+dodavanje na metodi na individualen objekt od klasa bez da se vlijae na drugite objekti
+
+VAZHNO!!!
+1. Koga kompleksnosta se bara da e O(n) SEKOGASH za sve so hash
+2. Koga falat elementi vo test primerite i imame komparatori, da se proverat vrednostite spored koi sporeduvame,
+    komparatorot treba da se proshiri
+3. Podobro e da se napravat povekje kolekcii kako elementi na klasata, sekoja so posebna cel za da se poednostavat
+    metodite vo klasata (se grupiraat elementite spored potrebite na metodite)
+4. Koga treba da se sporeduvaat elementi prvo spored eden uslov pa potoa spored drug, pa mozhebi i ushte nekoj da se
+    dodade se pishuvaat komparatori pri definiranje na TreeSeT, i elementite se dodavaat tamu bez razlika vo kakva
+    kolekcija bile prethodno
+5. Koga ima dva exceptions na isto mesto, a za edniot treba da se prodolzhi so chitanje na podatoci, a za drugiot ne
+    togash kaj toj shto treba da se prestane posle sout se stava break
+6. Koga se koristi get() kaj MAP, dokolku ima shansa dadeniot kluch da ne postoi, se koristi getOrDefault(key, new HashSet<>())
+                                                                                                                      |
+                                                                                                              soodvetna kolekcija
+                                                                                                              na koristenata mapa
+7. Koga ima iskluchoci koi nie treba da gi frlime i fatime na odredeno mesto, NE SMEE EDNO POD DRUGO
+    pravime posebna klasa kade shto se procesiraat podatocite "Factory", i tamu gi frlame iskluchocite,
+    a gi fakjame try/catch vo glavnata funkcija vo osnovnata klasa
+8. Vo void metod za sortiranje na lista, prvo se pravi komparator, a posle list.sort(comparator), i comparator.reversed ako treba obratno
+
+
+
